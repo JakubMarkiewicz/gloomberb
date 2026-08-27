@@ -316,7 +316,7 @@ export interface HostCheckboxProps {
   active?: boolean;
   description?: string;
   width?: number | string;
-  variant?: "default" | "desktop";
+  variant?: "default" | "desktop" | "compact";
 }
 
 export interface HostPopoverProps {

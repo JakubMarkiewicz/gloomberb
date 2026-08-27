@@ -241,7 +241,8 @@ export function CommandBarPanelBody({
             contentPadding={contentPadding}
             nativePaneChrome={nativePaneChrome}
             paletteBg={paletteBg}
-            panelBg={panelBg}
+            paletteHoverBg={paletteHoverBg}
+            paletteSelectedBg={paletteSelectedBg}
             onCommit={onMultiSelectCommit}
             onSelect={onMultiSelectSelect}
             onToggle={onMultiSelectToggle}
