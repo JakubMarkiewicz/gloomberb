@@ -75,7 +75,7 @@ export function resolveCommandBarPanelLayout({
     : 0;
   const nativeBodyChromeRows = (currentRoute?.kind === "workflow"
     || currentRoute?.kind === "confirm"
-    || showCustomMultiSelectPicker)
+    )
     ? 1
     : currentRoute ? 3 : 2;
   const barHeight = nativePaneChrome

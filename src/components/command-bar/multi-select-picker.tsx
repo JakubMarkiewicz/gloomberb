@@ -1,16 +1,16 @@
 import type { Dispatch, SetStateAction } from "react";
-import { Box } from "../../ui";
+import { Box, useUiHost } from "../../ui";
 import { t } from "../../i18n";
 import type { PluginRegistry } from "../../plugins/registry";
 import type { PaneSettingField } from "../../types/plugin";
 import { Button } from "../ui";
+import { ToggleList } from "../toggle-list";
 import {
   moveMultiSelectValue,
   toggleMultiSelectValue,
   toggleOrderedMultiSelectValue,
   type MultiSelectOption,
 } from "../ui/multi-select";
-import { ToggleList } from "../toggle-list";
 import { fuzzyFilter } from "../../utils/fuzzy-search";
 import { coerceFieldValues } from "./helpers";
 import type {
@@ -162,7 +162,8 @@ export function CommandBarMultiSelectBody({
   onSelect,
   onToggle,
   paletteBg,
-  panelBg,
+  paletteHoverBg,
+  paletteSelectedBg,
   route,
 }: {
   bodyHeight: number;
@@ -172,32 +173,44 @@ export function CommandBarMultiSelectBody({
   onSelect: (index: number) => void;
   onToggle: (id: string) => void;
   paletteBg: string;
-  panelBg: string;
+  paletteHoverBg: string;
+  paletteSelectedBg: string;
   route: CommandBarMultiSelectPickerRoute;
 }) {
+  const isDesktopWeb = useUiHost().kind === "desktop-web";
   const selectedValues = getMultiSelectPickerSelectedValues(route);
   const options = getVisibleMultiSelectPickerOptions(route);
   const items = options.map((option) => ({
     id: option.id,
     label: t(option.label),
+    description: option.description ? t(option.description) : undefined,
+    disabled: option.disabled,
     enabled: selectedValues.includes(option.id),
-    description: (option.description || option.detail) ? t(option.description || option.detail || "") : undefined,
   }));
   const selectedIdx = items.length === 0
     ? 0
     : Math.max(0, Math.min(route.selectedIdx, items.length - 1));
 
   return (
-    <Box flexDirection="column" height={bodyHeight} paddingX={contentPadding}>
+    <Box
+      flexDirection="column"
+      height={bodyHeight}
+      paddingX={contentPadding}
+    >
       <ToggleList
         items={items}
         selectedIdx={selectedIdx}
         flexGrow={1}
         scrollable
+        surface={isDesktopWeb ? "plain" : undefined}
+        bgColor={nativePaneChrome || isDesktopWeb ? "transparent" : paletteBg}
+        selectedBgColor={paletteSelectedBg}
+        hoverBgColor={paletteHoverBg}
+        checkboxVariant={isDesktopWeb ? "compact" : undefined}
+        markSelectedRow
         showSelectedDescription={false}
         onSelect={onSelect}
         onToggle={onToggle}
-        bgColor={nativePaneChrome ? panelBg : paletteBg}
         remoteLabel={route.title}
         remoteScope="command-bar"
         remoteMetadata={{
@@ -206,7 +219,11 @@ export function CommandBarMultiSelectBody({
           pickerId: route.pickerId,
         }}
       />
-      <Box flexDirection="row" gap={1}>
+      <Box
+        flexDirection="row"
+        gap={1}
+        style={isDesktopWeb ? { paddingTop: 10 } : undefined}
+      >
         <Button label={t("Done")} variant="primary" onPress={onCommit} />
       </Box>
     </Box>

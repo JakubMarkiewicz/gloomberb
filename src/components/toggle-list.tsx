@@ -1,4 +1,4 @@
-import { Box, useUiHost } from "../ui";
+import { Box, useUiHost, type HostCheckboxProps } from "../ui";
 import { colors } from "../theme/colors";
 import { Checkbox } from "./ui/checkbox";
 import { ListView, type ListRowState, type ListViewItem } from "./ui/list-view";
@@ -18,6 +18,10 @@ export interface ToggleListProps {
   onSelect?: (idx: number) => void;
   /** Background color for non-selected rows (defaults to colors.bg) */
   bgColor?: string;
+  selectedBgColor?: string;
+  hoverBgColor?: string;
+  checkboxVariant?: HostCheckboxProps["variant"];
+  markSelectedRow?: boolean;
   height?: number;
   flexGrow?: number;
   scrollable?: boolean;
@@ -36,14 +40,19 @@ function DesktopToggleRow({
   state,
   rowIdPrefix,
   enabled,
+  checkboxVariant,
+  markSelectedRow,
   onPress,
 }: {
   item: ListViewItem;
   state: ListRowState;
   rowIdPrefix?: string;
   enabled: boolean;
+  checkboxVariant: HostCheckboxProps["variant"];
+  markSelectedRow?: boolean;
   onPress: () => void;
 }) {
+  const compact = checkboxVariant === "compact";
   return (
     <Box
       id={rowIdPrefix ? `${rowIdPrefix}:${item.id}` : undefined}
@@ -51,10 +60,14 @@ function DesktopToggleRow({
       alignItems="center"
       width="100%"
       minWidth={0}
+      data-command-bar-row-selected={
+        markSelectedRow && state.selected ? "true" : undefined
+      }
       style={{
         height: "100%",
-        gap: 10,
-        paddingInline: 10,
+        ...(compact
+          ? { borderRadius: 0, minHeight: 0 }
+          : { gap: 10, paddingInline: 10 }),
         opacity: state.disabled ? 0.55 : 1,
       }}
     >
@@ -64,7 +77,7 @@ function DesktopToggleRow({
         disabled={state.disabled}
         active={state.selected}
         width="100%"
-        variant="desktop"
+        variant={checkboxVariant}
         onChange={onPress}
       />
     </Box>
@@ -77,6 +90,10 @@ export function ToggleList({
   onToggle,
   onSelect,
   bgColor,
+  selectedBgColor,
+  hoverBgColor,
+  checkboxVariant,
+  markSelectedRow,
   height,
   flexGrow,
   scrollable,
@@ -90,6 +107,8 @@ export function ToggleList({
   remoteMetadata,
 }: ToggleListProps) {
   const isDesktopWeb = useUiHost().kind === "desktop-web";
+  const resolvedCheckboxVariant =
+    checkboxVariant ?? (isDesktopWeb ? "desktop" : "default");
   const listItems: ListViewItem[] = items.map((item) => ({
     id: item.id,
     label: item.label,
@@ -102,6 +121,8 @@ export function ToggleList({
       items={listItems}
       selectedIndex={selectedIdx}
       bgColor={bgColor ?? colors.bg}
+      selectedBgColor={selectedBgColor}
+      hoverBgColor={hoverBgColor}
       showSelectedDescription={showSelectedDescription}
       height={height}
       flexGrow={flexGrow}
@@ -119,7 +140,7 @@ export function ToggleList({
       }}
       renderRow={(item, state, index) => {
         const toggleItem = items.find((entry) => entry.id === item.id);
-        const activate = (event?: { stopPropagation?: () => void; preventDefault?: () => void }) => {
+				const activate = (event?: { stopPropagation?: () => void; preventDefault?: () => void }) => {
           event?.stopPropagation?.();
           event?.preventDefault?.();
           if (state.disabled) return;
@@ -133,6 +154,8 @@ export function ToggleList({
               state={state}
               rowIdPrefix={rowIdPrefix}
               enabled={toggleItem?.enabled === true}
+              checkboxVariant={resolvedCheckboxVariant}
+              markSelectedRow={markSelectedRow}
               onPress={() => activate()}
             />
           );

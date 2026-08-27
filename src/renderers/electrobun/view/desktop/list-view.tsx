@@ -4,6 +4,7 @@ import { Box, ScrollBox, Text, type ScrollBoxRenderable } from "../../../../ui";
 import { TextAttributes } from "../../../../ui";
 import type { ListRowState, ListViewItem, ListViewProps } from "../../../../components/ui/list-view";
 import { blendHex, hoverBg, type ThemeColors } from "../../../../theme/colors";
+import { WEB_CELL_HEIGHT } from "../input-host";
 import { useThemeColors } from "../../../../theme/theme-context";
 import {
   CONTROL_RADIUS,
@@ -114,13 +115,15 @@ export function WebListView({
     const scrollBox = scrollRef.current;
     if (!scrollBox) return;
     const safeIndex = Math.min(activeScrollIndex, items.length - 1);
-    const viewportHeight = Math.max(scrollBox.viewport?.height ?? 0, 1);
-    const rowTop = safeIndex * rowHeight;
-    const rowBottom = rowTop + rowHeight;
-    if (rowTop < scrollBox.scrollTop) {
-      scrollBox.scrollTo(rowTop);
-    } else if (rowBottom > scrollBox.scrollTop + viewportHeight) {
-      scrollBox.scrollTo(rowBottom - viewportHeight);
+    const scrollTop = scrollBox.scrollTopPx ?? 0;
+    const viewportHeight = Math.max(scrollBox.viewportPx?.height ?? 0, 1);
+    const rowHeightPx = rowHeight * WEB_CELL_HEIGHT;
+    const rowTop = safeIndex * rowHeightPx;
+    const rowBottom = rowTop + rowHeightPx;
+    if (rowTop < scrollTop) {
+      scrollBox.scrollToPixels?.(rowTop);
+    } else if (rowBottom > scrollTop + viewportHeight) {
+      scrollBox.scrollToPixels?.(rowBottom - viewportHeight);
     }
   }, [activeScrollIndex, autoScrollToIndex, items.length, rowHeight, scrollable]);
 
@@ -176,7 +179,13 @@ export function WebListView({
     });
 
   return (
-    <Box flexDirection="column" height={height} flexGrow={flexGrow} gap={1}>
+    <Box
+      flexDirection="column"
+      height={height}
+      flexGrow={flexGrow}
+      flexShrink={1}
+      gap={1}
+    >
       {scrollable ? (
         <ScrollBox
           ref={scrollRef}

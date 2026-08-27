@@ -111,6 +111,7 @@ export function WebCheckbox({
   active = false,
   description,
   width,
+  variant = "default",
 }: CheckboxProps) {
   const colors = useThemeColors();
   const textColor = disabled
@@ -121,6 +122,8 @@ export function WebCheckbox({
   const visibleLabel = displayLabel ?? label;
   const accentColor = checkboxAccentColor(colors);
   const borderColor = checked ? accentColor : controlBorderColor(active, false, colors);
+  const boxSize = variant === "compact" ? 12 : 14;
+  const backgroundSize = boxSize - 2;
   return (
     <Box
       flexDirection="column"
@@ -148,7 +151,7 @@ export function WebCheckbox({
           cursor: disabled ? "default" : "pointer",
           color: textColor,
           fontWeight: active ? 700 : 500,
-          lineHeight: "20px",
+          lineHeight: variant === "compact" ? "calc(var(--cell-h) - 2px)" : "20px",
           userSelect: "none",
           position: "relative",
         }}
@@ -161,14 +164,14 @@ export function WebCheckbox({
           style={{
             appearance: "none",
             WebkitAppearance: "none",
-            width: 14,
-            height: 14,
+            width: boxSize,
+            height: boxSize,
             margin: 0,
             backgroundColor: checked ? accentColor : panelFill(colors),
             backgroundImage: checked ? checkboxCheckImage() : undefined,
             backgroundPosition: "center",
             backgroundRepeat: "no-repeat",
-            backgroundSize: "12px 12px",
+            backgroundSize: `${backgroundSize}px ${backgroundSize}px`,
             border: `1px solid ${borderColor}`,
             borderRadius: 4,
             boxShadow: active
